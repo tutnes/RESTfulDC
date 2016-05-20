@@ -1,0 +1,213 @@
+<!doctype html>
+<!--
+   DC RUM Restful Helper
+
+   This tool is used to assist users in pulling data from DC RUM
+   using the RESTful interface
+
+   For questions, please email brett.barrett@dynatrace.com
+
+   Version: 2.0.3
+-->
+
+<html>
+  <head>
+    <title>DC RUM RESTful Helper</title>
+
+    
+    <link rel="stylesheet" href="./material.min.css">
+    <script src="./material.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="material-rest.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script src="RESTfulDC.js"></script>
+  </head>
+
+  <body>
+<main class="mdl-layout__content mdl-color--grey-100">
+<div>
+
+    <div class="title">
+      <h3>DMI REST Services</h3>
+      <div id="serverNameDiv">
+        <p>Server name: <textarea id="serverName" style="width: 12em;" oninput="setServerName(this.value);"></textarea></p>
+      </div>
+    </div>
+    <div class="body">
+      <div id="getParameters" class="column demo-charts mdl-color--white mdl-shadow--2dp mdl-cell mdl-cell--12-col mdl-grid">
+        <div class="mdl-layout-title">
+          <div id="getParametersTitle">
+            <h4>Parameters</h4>
+          </div>
+          <button id="sampleDataButton" onClick="testSelectedValues()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Get data</button>
+        </div>
+        <div class="content" id="getParametersBody">
+          <div id="applications" class="lineItem">
+            Data Sources
+            <select id="datasource" onchange="updateQueriedParameters('datasource');"></select>
+          </div>
+
+          <div id="dataviews" class="lineItem">
+            Dataviews
+            <select id="dataview" onchange="updateQueriedParameters('dataview');"></select>
+          </div>
+
+          <div id="resolutions" class="lineItem">
+            Resolution
+            <select id="resolution" onchange="updateQueriedParameters('resolution');"></select>
+          </div>
+
+          <div id="dimensions" class="lineItem">
+            
+              Dimensions
+              <button id="addDimButton" onclick="addDimensionQuery();" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">+</button>
+              <button id="remDimButton" onclick="removeDimensionQuery();" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">-</button>
+            
+</div>
+
+          <div id="metrics" class="lineItem">
+            Metrics
+              <button id="addMetricButton" onclick="addMetricQuery();" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">+</button>
+              <button id="remMetricButton" onclick="removeMetricQuery();" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">-</button>
+            
+</div>
+
+          <div class="lineItem">
+            Time Period
+            <select id="timePeriod"></select>
+          </div>
+        </div>
+      </div>
+
+      <div id="restQueryParameters" class="column demo-charts mdl-color--white mdl-shadow--2dp mdl-cell mdl-cell--12-col mdl-grid">
+        <div class="mdl-layout-title">
+          <h4>Filters and Options</h4>
+        </div>
+        <div id="restQueryParametersContent" class="content">
+
+          <div id="dimFiltersDiv" class="lineItem">
+            Dimension Filters
+            <div class="addSub" onclick="addDimensionFilterLine();"">
+             <i class="material-icons">add</i>
+             </div>
+             <div class="addSub" onclick="removeDimensionFilterLine();">
+             <i class="material-icons">remove</i>
+             </div onclick="removeMetricFilterLine();">
+            
+            
+          </div>
+
+          <div id="metricFiltersDiv" class="lineItem">
+            Metric Filters
+             <div class="addSub" onclick="addMetricFilterLine();">
+             <i class="material-icons">add</i>
+             </div>
+             <div class="addSub" onclick="removeMetricFilterLine();">
+             <i class="material-icons">remove</i>
+             </div onclick="removeMetricFilterLine();">
+            <br/>
+          </div>
+
+          <div id="sortDiv" class="lineItem">
+            Sort
+            <select id="sortParam" class="rightRow" style="width: 60%;">
+              <option value="">Select a parameter to sort by</option>
+            </select><select id="sortDir" class="leftRow" style="width: 30%;">
+              <option value="">Select a sort type</option>
+              <option value="ASC">Ascending</option>
+              <option value="DESC">Descending</option>
+            </select>
+          </div>
+
+          <div class="lineItem" style="display: none;">
+            <h4>Top Filter</h4>
+            <textarea id="topFilter"></textarea>
+          </div>
+
+          <div class="lineItem">
+            Number of Periods
+            <textarea id="numberOfPeriods">1</textarea>
+          </div>
+        </div>
+        <div id="userOutputDiv" class="smallColumn">
+          <div id="userOutputHeader" class="header">
+            Console
+            <button id='copyURLButton' onclick="copyURL();" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Copy URL</button>
+          </div>
+</div>
+      </div>
+
+      <div id="sampleData" class="column demo-charts mdl-color--white mdl-shadow--2dp mdl-cell mdl-cell--12-col mdl-grid">
+        <div class="mdl-layout-title">
+          Sample Data
+          <button onclick="enlargeSampleData();" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Enlarge</button>
+        </div>
+
+        <div id="sampleDataOutput" class="content"></div>
+
+        <div id="JSONScriptDiv" class="smallColumn">
+          <div id="JSONScriptHead" class="header">
+            JSON Script
+            <button id='copyJSONButton' onclick="clipboard('JSONOutput',0);" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Copy JSON</button>
+          </div>
+          <div id="JSONOutput" class="content"></div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="footerCol">
+          Developed by Brett Barrett
+        </div>
+        <div class="footerCol" style="left: 46%;">
+          <a onClick="help();" style="text-decoration: underline; cursor:pointer;">Help</a>
+        </div>
+        <button onclick="reset();" style="height:2em;" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Reset Helper</button>
+      </div>
+
+      <div id="largeDataDiv">
+        <h1>Sample Data</h1>
+
+        <div onclick="enlargeSampleData();" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">X</div>
+</div>
+
+      <div id="busy">
+        <div id="busyContent">
+          <div class="header" style="padding: 10px;"><h1>Querying the CAS...</h1></div>
+          <img src="/img/ajax-loader.gif" alt="loader"><br><br><button onclick="cancelRequest()" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">Cancel the request</button>
+        </div>
+      </div>
+
+      <div id="helpDiv">
+        <h1>DC RUM RESTful Help</h1>
+
+        <div class="closeButton" onclick="help();">X</div>
+
+        <div id="helpContent">
+          <div id="tableOfContents">
+            <h4>Table of contents:</h4>
+          </div>
+
+          <h4><a>Why do I always have to log back in after a refresh?</a></h4>
+          Something about pulling possible parameters from the CAS using the /rest/dmiquery URI forces the user to log back into the CAS upon leaving the RESTful page.
+
+          <h4><a>Empty return set</a></h4>
+          There are some Application / Dimensions / Metrics combinations that, although appear from the RESTful helper, may not actually provide any data. This could be because there's no data in the CAS for that combination.
+
+          <h4><a>Can not connect to CAS</a></h4>
+          If you have a problem connecting to the CAS, verify the CAS server name is correct in the top-right server name box.
+          <br><br>
+          *Note*
+          Due to XSS issues, you should only use this tool on the CAS you are querying data from. The server name field is only to verify the server name was parsed correctly from the URI.
+
+          <h4><a>No dimension or metric filters</a></h4>
+          Make sure to select both a Dimension and a Metric before selecting a filter or sort option.<br>
+
+          <h4><a>RESTful Helper does not appear correctly</a></h4>
+          The RESTful Helper is optimized for Chrome on a 1080p display. If your resolution is lower, zoom out and the page should fit better.<br>
+        </div>
+      </div>
+    </div>
+
+</div>
+</main>
+  </body>
+</html>
